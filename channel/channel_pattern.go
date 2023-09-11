@@ -14,7 +14,9 @@ import (
 
 // fan out/in semaphore pattern provides a mechanic to control the number of goroutines executing work at any given time
 func fanOutSem() {
+	// get num of cpu cores
 	processNum := runtime.GOMAXPROCS(0)
+	// we use sem to ensure that we have max processNum goroutines at the same time
 	sem := make(chan struct{}, processNum)
 
 	job := 2_000
