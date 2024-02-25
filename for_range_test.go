@@ -1,8 +1,9 @@
 package main
 
 import (
-	"fmt"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 /*
@@ -23,17 +24,24 @@ func TestForRangeOnArray(t *testing.T) {
 			if i == 0 {
 				arr[2] = 30
 			}
-			fmt.Println(i, arr[i])
+			if i == 2 {
+				assert.Equal(t, 30, arr[2])
+			}
 		}
+		assert.Equal(t, 30, arr[2])
 	})
 
 	t.Run("value semantics on array", func(t *testing.T) {
 		var arr = [5]int{1, 2, 3, 4, 5}
+		// 会copy一份arr
 		for i, num := range arr {
 			if i == 0 {
 				arr[2] = 30
 			}
-			fmt.Println(i, num)
+			if i == 2 {
+				assert.Equal(t, 3, num)
+			}
 		}
+		assert.Equal(t, 30, arr[2])
 	})
 }
