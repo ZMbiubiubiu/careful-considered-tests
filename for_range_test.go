@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"runtime"
+
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -26,49 +27,25 @@ func TestForRangeOnArray(t *testing.T) {
 			if i == 0 {
 				arr[2] = 30
 			}
-			fmt.Println(i, arr[i])
+			if i == 2 {
+				assert.Equal(t, 30, arr[2])
+			}
 		}
+		assert.Equal(t, 30, arr[2])
 	})
 
 	t.Run("value semantics on array", func(t *testing.T) {
 		var arr = [5]int{1, 2, 3, 4, 5}
-		fmt.Println("before range: ", arr)
+		// 会copy一份arr
 		for i, num := range arr {
 			if i == 0 {
 				arr[2] = 30
 			}
-			fmt.Println(i, num)
-		}
-		fmt.Println("after range: ", arr)
-	})
-}
-
-func TestForRangeIteratorVariable(t *testing.T) {
-	fruits := []string{"apple", "orange", "banana", "peach"}
-	for i, fruit := range fruits {
-		fmt.Printf("Index:%d\tAddress Of fruit:%p\t\n", i, &fruit)
-	}
-}
-
-func TestForRangeOnSlice(t *testing.T) {
-	t.Run("pointer semantics on slice", func(t *testing.T) {
-		var arr = []int{1, 2, 3, 4, 5}
-		for i := range arr {
-			if i == 0 {
-				arr[2] = 30
+			if i == 2 {
+				assert.Equal(t, 3, num)
 			}
-			fmt.Println(i, arr[i])
 		}
-	})
-
-	t.Run("value semantics on slice", func(t *testing.T) {
-		var arr = []int{1, 2, 3, 4, 5}
-		for i, num := range arr {
-			if i == 0 {
-				arr[2] = 30
-			}
-			fmt.Println(i, num)
-		}
+		assert.Equal(t, 30, arr[2])
 	})
 }
 
