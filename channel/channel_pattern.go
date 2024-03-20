@@ -1,6 +1,6 @@
 // 包含channel常用的使用模式
 
-package channel
+package main
 
 import (
 	"context"
