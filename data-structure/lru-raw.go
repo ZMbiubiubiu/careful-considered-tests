@@ -15,6 +15,7 @@ func NewLinkedList() *LinkedList {
 	list := new(LinkedList)
 	list.begin = new(ListNode)
 	list.tail = new(ListNode)
+	list.tail.Value = -1
 
 	list.begin.Next = list.tail
 	list.tail.Pre = list.begin
@@ -27,24 +28,36 @@ func (l *LinkedList) deleteNode(node *ListNode) {
 	node.Next.Pre = node.Pre
 }
 
-func (l *LinkedList) AddNodeToHead(key, value int) {
+func (l *LinkedList) insertToHead(node *ListNode) {
+	if node == nil {
+		return
+	}
+	original := l.begin.Next
+
+	l.begin.Next = node
+	node.Pre = l.begin
+	node.Next = original
+	original.Pre = node
+}
+
+// AddNodeToHead 新建node，并插入到头结点
+func (l *LinkedList) AddNodeToHead(key, value int) *ListNode {
 	node := &ListNode{
 		Key:   key,
 		Value: value,
 	}
 
-	l.MoveNodeToHead(node)
+	l.insertToHead(node)
+	return node
 }
 
+// MoveNodeToHead 将节点从其他位置，插入到头结点
 func (l *LinkedList) MoveNodeToHead(node *ListNode) {
 	if node == nil {
 		return
 	}
-	originalHead := l.begin.Next
-	node.Pre = l.begin
-	l.begin.Next = node
-	node.Next = originalHead
-	originalHead.Pre = node
+	l.deleteNode(node)
+	l.insertToHead(node)
 }
 
 type LRURaw struct {
@@ -80,10 +93,9 @@ func (lru *LRURaw) Set(key, value int) {
 	if !isExist {
 		if !lru.IsUnderCap() {
 			lru.list.deleteNode(lru.list.tail.Pre)
-			delete(lru.m, key)
+			delete(lru.m, lru.list.tail.Pre.Key)
 		}
-		node := &ListNode{Key: key, Value: value}
-		lru.list.MoveNodeToHead(node)
+		node = lru.list.AddNodeToHead(key, value)
 		lru.m[key] = node
 		return
 	}
@@ -95,9 +107,10 @@ func (lru *LRURaw) Set(key, value int) {
 
 func main() {
 	lru := NewLRURaw(5)
-	for i := 0; i < 10; i++ {
+	for i := 1; i <= 10; i++ {
 		lru.Set(i, i)
 	}
+	fmt.Println("map size", len(lru.m))
 
 	fmt.Println("ok")
 }
