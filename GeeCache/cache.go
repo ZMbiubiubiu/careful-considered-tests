@@ -1,4 +1,4 @@
-// 负责与外部交互，控制缓存存储和获取的主流程
+// 并发控制
 
 package geecache
 
@@ -32,6 +32,7 @@ func (c *cache) get(key string) (value ByteView, ok bool) {
 func (c *cache) set(key string, value ByteView) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
+	// 懒加载
 	if c.lru == nil {
 		c.lru = lru.New(c.cacheBytes, nil)
 	}

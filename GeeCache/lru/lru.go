@@ -58,16 +58,18 @@ func (c *Cache) RemoveOldest() {
 func (c *Cache) Set(key string, value Value) {
 	ele, ok := c.cache[key]
 	if ok {
-		kv := ele.Value.(*entry)
 		c.ll.MoveToFront(ele)
-		c.nBytes = c.nBytes + int64(value.Len()) - int64(kv.value.Len())
+		kv := ele.Value.(*entry)
 		kv.value = value
+		// 更新当前lru的总存储量
+		c.nBytes = c.nBytes + int64(value.Len()) - int64(kv.value.Len())
 	} else {
 		ele = c.ll.PushFront(&entry{key, value})
 		c.nBytes += int64(len(key)) + int64(value.Len())
 		c.cache[key] = ele
 	}
 
+	// 如果超出内存限制，进行元素驱逐
 	for c.maxBytes != 0 && c.maxBytes < c.nBytes {
 		c.RemoveOldest()
 	}
