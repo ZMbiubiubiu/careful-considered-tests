@@ -2,22 +2,37 @@ package lru
 
 import "container/list"
 
+type Cache struct {
+	maxBytes  int64 // 最大的存储量，单位byte（若为0，表示没有上限）
+	nBytes    int64 // 当前使用的存储量，单位byte
+	ll        *list.List
+	m         map[string]*list.Element
+	OnEvicted func(key string, value Value)
+}
+
+/*
+// Element 表示双向链表ll的节点，同时也是字典m键值对中的值
+// Element's Value 我们用自定义的entry
+type Element struct {
+	next, prev *Element
+
+	// The list to which this element belongs.
+	list *List
+
+	// The value stored with this element.
+	Value any
+}
+*/
+
 type entry struct {
 	key   string
 	value Value
 }
 
-// Value 为了键值对，值的通用性，实现Len即可，返回占用的内存
+// Value 为了通用性，实现Len即可
+// 语义是返回占用的内存
 type Value interface {
 	Len() int
-}
-
-type Cache struct {
-	maxBytes  int64 // 最大的存储量（若为0，表示没有上限）
-	nBytes    int64 // 当前使用的存储量
-	ll        *list.List
-	cache     map[string]*list.Element
-	OnEvicted func(key string, value Value)
 }
 
 func New(maxBytes int64, onEvicted func(string, Value)) *Cache {
@@ -25,13 +40,13 @@ func New(maxBytes int64, onEvicted func(string, Value)) *Cache {
 		maxBytes:  maxBytes,
 		nBytes:    0,
 		ll:        list.New(),
-		cache:     make(map[string]*list.Element),
+		m:         make(map[string]*list.Element),
 		OnEvicted: onEvicted,
 	}
 }
 
 func (c *Cache) Get(key string) (value Value, ok bool) {
-	if element, ok := c.cache[key]; ok {
+	if element, ok := c.m[key]; ok {
 		c.ll.MoveToFront(element)
 		kv := element.Value.(*entry)
 		value = kv.value
@@ -48,7 +63,7 @@ func (c *Cache) RemoveOldest() {
 
 	c.ll.Remove(ele)
 	kv := ele.Value.(*entry)
-	delete(c.cache, kv.key)
+	delete(c.m, kv.key)
 	c.nBytes -= int64(len(kv.key)) + int64(kv.value.Len())
 	if c.OnEvicted != nil {
 		c.OnEvicted(kv.key, kv.value)
@@ -56,7 +71,7 @@ func (c *Cache) RemoveOldest() {
 }
 
 func (c *Cache) Set(key string, value Value) {
-	ele, ok := c.cache[key]
+	ele, ok := c.m[key]
 	if ok {
 		c.ll.MoveToFront(ele)
 		kv := ele.Value.(*entry)
@@ -66,7 +81,7 @@ func (c *Cache) Set(key string, value Value) {
 	} else {
 		ele = c.ll.PushFront(&entry{key, value})
 		c.nBytes += int64(len(key)) + int64(value.Len())
-		c.cache[key] = ele
+		c.m[key] = ele
 	}
 
 	// 如果超出内存限制，进行元素驱逐
