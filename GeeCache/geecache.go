@@ -1,4 +1,4 @@
-                 负责与外部交互，控制缓存存储和获取的主流程
+// 负责与外部交互，控制缓存存储和获取的主流程
 
 package geecache
 
@@ -55,6 +55,7 @@ func NewGroup(name string, cacheBytes int64, getter Getter) *Group {
 		mainCache: cache{cacheBytes: cacheBytes},
 		loader:    &singleflight.Group{},
 	}
+	// 将节点添加到groups
 	groups[name] = g
 
 	return g

@@ -21,10 +21,11 @@ const (
 )
 
 // HTTPPool implements PeerPicker for a pool of HTTP peers
+// 实现节点间通信的核心数据结构
 // 借助一致性hash算法选择节点
 type HTTPPool struct {
 	self        string //记录自己的地址，包括主机名/IP 和端口
-	basePath    string
+	basePath    string // 节点间通信地址的前缀
 	mu          sync.Mutex
 	peers       *consistenthash.Map    // 用来根据具体的key选择节点
 	httpGetters map[string]*httpGetter // keyed by e.g. "http://10.0.0.2:8008" 每一个远程节点对应一个httpGetter
@@ -46,7 +47,7 @@ func (p *HTTPPool) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		panic("HTTPPool serving unexpected path: " + r.URL.Path)
 	}
 	p.Log("%s %s", r.Method, r.URL.Path)
-	// /<basepath>/<groupname>/<key>
+	// 访问路径的格式为：/<basepath>/<groupname>/<key>
 	parts := strings.SplitN(r.URL.Path[len(p.basePath):], "/", 2)
 	if len(parts) != 2 {
 		http.Error(w, "bad request", http.StatusBadRequest)
