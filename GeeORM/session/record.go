@@ -13,6 +13,7 @@ import (
 func (s *Session) Insert(values ...interface{}) (int64, error) {
 	recordValues := make([]interface{}, 0)
 	for _, value := range values {
+		s.CallMethod(BeforeInsert, value)
 		// 最多只会解析一次model，go struct -> db schema
 		table := s.Model(value).RefTable()
 		// 幂等set
