@@ -1,4 +1,4 @@
-// 并发控制
+// 拥有并发控制能力的LRU，缓存值用抽象的ByteView
 
 package geecache
 

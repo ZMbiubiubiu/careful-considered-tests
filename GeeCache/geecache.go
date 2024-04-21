@@ -1,4 +1,4 @@
-// 负责与外部交互，控制缓存存储和获取的主流程
+                 负责与外部交互，控制缓存存储和获取的主流程
 
 package geecache
 
@@ -11,7 +11,8 @@ import (
 )
 
 // A Getter loads data for a key.
-// 允许用户自定义方法，目的是寻找key对应的值
+// 允许用户自定义方法
+// 缓存中未查找到，由用户自己决定如何获取数据
 type Getter interface {
 	Get(key string) ([]byte, error)
 }
@@ -82,7 +83,7 @@ func (g *Group) Get(key string) (ByteView, error) {
 		return ByteView{}, fmt.Errorf("key is required")
 	}
 	if v, ok := g.mainCache.get(key); ok {
-		log.Println("[GeeCache hit]")
+		log.Println("[GeeCache hit]", key)
 		return v, nil
 	}
 	return g.load(key)
@@ -108,7 +109,7 @@ func (g *Group) load(key string) (value ByteView, err error) {
 		return viewi.(ByteView), nil
 	}
 
-	return
+	return value, err
 }
 
 func (g *Group) getFromPeer(peer PeerGetter, key string) (ByteView, error) {
