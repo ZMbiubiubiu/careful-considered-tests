@@ -4,15 +4,17 @@ import (
 	"database/sql"
 	"strings"
 
+	"geeorm/clause"
 	"geeorm/dialect"
 	"geeorm/log"
 	"geeorm/schema"
 )
 
 type Session struct {
-	db       *sql.DB
+	db       *sql.DB // 数据库连接
 	dialect  dialect.Dialect
-	refTable *schema.Schema
+	refTable *schema.Schema // struct 与 db的映射
+	clause   clause.Clause  // sql 子句
 	sql      strings.Builder
 	sqlVars  []interface{}
 }
@@ -28,6 +30,7 @@ func New(db *sql.DB, dialect dialect.Dialect) *Session {
 func (s *Session) Clear() {
 	s.sql.Reset()
 	s.sqlVars = nil
+	s.clause = clause.Clause{}
 }
 
 func (s *Session) DB() *sql.DB {
