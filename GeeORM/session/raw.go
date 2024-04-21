@@ -57,7 +57,7 @@ func (s *Session) Exec() (result sql.Result, err error) {
 	return
 }
 
-func (s *Session) Query() (rows *sql.Rows, err error) {
+func (s *Session) QueryRows() (rows *sql.Rows, err error) {
 	defer s.Clear()
 	log.Info(s.sql.String(), s.sqlVars)
 	if rows, err = s.DB().Query(s.sql.String(), s.sqlVars...); err != nil {
