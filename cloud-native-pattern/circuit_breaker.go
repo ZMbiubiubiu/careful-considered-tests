@@ -12,6 +12,10 @@ import (
 // A closure is a nested function that has access to the variables
 // of its parent function, even after the parent has executed
 
+// circuit-breaker
+// 当一个功能连续失败到达阈值，进入熔断状态，直接返回错误
+// 何时可以重试？达到时间要求，采用指数退避的形式
+
 type Circuit func(ctx context.Context) (string, error)
 
 func Breaker(circuit Circuit, failureThreshold uint) Circuit {
