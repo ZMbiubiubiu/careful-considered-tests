@@ -15,7 +15,7 @@ type Map struct {
 	hash      Hash
 	replicas  int            // 节点的倍数，一个节点可产生replicas个虚拟节点，解决数据倾斜问题
 	vnodes    []int          // 虚拟节点hash值组成的hash环
-	hash2node map[int]string // 虚拟节点hash值与节点的映射关系
+	hash2node map[int]string // 虚拟节点hash值与节点的映射关系，为了通过hash值找到相应的节点
 }
 
 func New(replicas int, fn Hash) *Map {
@@ -57,6 +57,7 @@ func (m *Map) Get(key string) string {
 
 	hash := int(m.hash([]byte(key)))
 
+	// use binary search to find the 1st between [0, n) to meet the func
 	idx := sort.Search(len(m.vnodes), func(i int) bool {
 		return m.vnodes[i] >= hash
 	})
