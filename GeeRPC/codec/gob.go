@@ -17,6 +17,9 @@ type GobCodec struct {
 var _ Codec = (*GobCodec)(nil)
 
 func NewGobCodec(conn io.ReadWriteCloser) Codec {
+	// 使用NewWriter的作用
+	// 数据可以被高效地写入到连接中（conn）：
+	// 数据足够多或者主动调用Flush方法会将数据写入到conn中
 	buf := bufio.NewWriter(conn)
 	return &GobCodec{
 		conn: conn,
