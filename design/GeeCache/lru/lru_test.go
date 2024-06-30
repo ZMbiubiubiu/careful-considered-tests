@@ -1,6 +1,8 @@
 package lru
 
 import (
+	"fmt"
+	"os"
 	"reflect"
 	"testing"
 )
@@ -9,6 +11,11 @@ type String string
 
 func (d String) Len() int {
 	return len(d)
+}
+
+func TestMain(m *testing.M) {
+	fmt.Println("test lru")
+	os.Exit(m.Run())
 }
 
 func TestGet(t *testing.T) {

@@ -24,6 +24,7 @@ type Element struct {
 }
 */
 
+// *entry作为Element的Value
 type entry struct {
 	key   string
 	value Value
@@ -75,9 +76,9 @@ func (c *Cache) Set(key string, value Value) {
 	if ok {
 		c.ll.MoveToFront(ele)
 		kv := ele.Value.(*entry)
-		kv.value = value
 		// 更新当前lru的总存储量
 		c.nBytes = c.nBytes + int64(value.Len()) - int64(kv.value.Len())
+		kv.value = value
 	} else {
 		ele = c.ll.PushFront(&entry{key, value})
 		c.nBytes += int64(len(key)) + int64(value.Len())
